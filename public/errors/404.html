@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <title>Not Found | Forbidden | Unauthorized | Pilih Jurusan</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf-token">
+<meta name="description" content="">
+<meta name="keywords" content="">    <link rel="preload" as="style" href="https://piljur.test/build/assets/app.7d555aa0.css" nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG" /><link rel="stylesheet" href="https://piljur.test/build/assets/app.7d555aa0.css" nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG" />    <!-- Livewire Styles -->
+<style nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG">
+    [wire\:loading], [wire\:loading\.delay], [wire\:loading\.inline-block], [wire\:loading\.inline], [wire\:loading\.block], [wire\:loading\.flex], [wire\:loading\.table], [wire\:loading\.grid], [wire\:loading\.inline-flex] {
+        display: none;
+    }
+
+    [wire\:loading\.delay\.shortest], [wire\:loading\.delay\.shorter], [wire\:loading\.delay\.short], [wire\:loading\.delay\.long], [wire\:loading\.delay\.longer], [wire\:loading\.delay\.longest] {
+        display:none;
+    }
+
+    [wire\:offline] {
+        display: none;
+    }
+
+    [wire\:dirty]:not(textarea):not(input):not(select) {
+        display: none;
+    }
+
+    input:-webkit-autofill, select:-webkit-autofill, textarea:-webkit-autofill {
+        animation-duration: 50000s;
+        animation-name: livewireautofill;
+    }
+
+    @keyframes livewireautofill { from {} }
+</style>
+</head>
+
+<body class="">
+    <div
+        class="relative flex items-top justify-center min-h-screen bg-dark-100 dark:bg-dark-500 sm:items-center sm:pt-0">
+        <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
+            <div class="flex mb-2 items-center justify-center pt-8 sm:pt-0">
+                <div class="px-4 text-2xl text-light-100 border-r border-light-100 tracking-wider">
+                    404
+                </div>
+
+                <div class="ml-4 text-2xl text-light-100 uppercase tracking-wider">
+                    Not Found
+                </div>
+            </div>
+            <p class="text-center font-light text-light-100 py-2 text-lg">Halaman tidak ditemukan
+                <br>ke <a class="text-primary-400" href="https://piljur.test">Halaman
+                    Utama</a>
+            </p>
+        </div>
+    </div>
+    <link rel="modulepreload" href="https://piljur.test/build/assets/app.43039c2b.js" nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG" /><script type="module" src="https://piljur.test/build/assets/app.43039c2b.js" nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG"></script>    <!-- Livewire Scripts -->
+
+<script src="/livewire/livewire.js?id=de3fca26689cb5a39af4" data-turbo-eval="false" data-turbolinks-eval="false" nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG"></script>
+<script data-turbo-eval="false" data-turbolinks-eval="false" nonce="OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG">
+    if (window.livewire) {
+	    console.warn('Livewire: It looks like Livewire\'s @livewireScripts JavaScript assets have already been loaded. Make sure you aren\'t loading them twice.')
+	}
+
+    window.livewire = new Livewire({"nonce":"OwtGCA4HlPb9o9n2mvXIs2kvs5dSxb8Ube08sbVG"});
+    window.livewire.devTools(true);
+    window.Livewire = window.livewire;
+    window.livewire_app_url = '';
+    window.livewire_token = '';
+
+	/* Make sure Livewire loads first. */
+	if (window.Alpine) {
+	    /* Defer showing the warning so it doesn't get buried under downstream errors. */
+	    document.addEventListener("DOMContentLoaded", function () {
+	        setTimeout(function() {
+	            console.warn("Livewire: It looks like AlpineJS has already been loaded. Make sure Livewire\'s scripts are loaded before Alpine.\\n\\n Reference docs for more info: http://laravel-livewire.com/docs/alpine-js")
+	        })
+	    });
+	}
+
+	/* Make Alpine wait until Livewire is finished rendering to do its thing. */
+    window.deferLoadingAlpine = function (callback) {
+        window.addEventListener('livewire:load', function () {
+            callback();
+        });
+    };
+
+    let started = false;
+
+    window.addEventListener('alpine:initializing', function () {
+        if (! started) {
+            window.livewire.start();
+
+            started = true;
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (! started) {
+            window.livewire.start();
+
+            started = true;
+        }
+    });
+</script>
+</body>
+
+</html>

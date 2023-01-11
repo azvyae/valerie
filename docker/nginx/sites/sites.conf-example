@@ -1,0 +1,82 @@
+server {
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+    charset utf-8;
+
+    # For https
+    listen 443 ssl;
+    listen [::]:443 ssl ipv6only=on;
+    ssl_certificate /etc/nginx/ssl/${SERVER_NAME}.crt;
+    ssl_certificate_key /etc/nginx/ssl/${SERVER_NAME}.key;
+
+    server_name ${SERVER_NAME};
+    root /var/www/html/htdocs;
+    index index.php index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+
+    error_page 401 /errors/401.html;
+    location = /errors/401.html {
+        internal;
+    }
+    error_page 403 /errors/403.html;
+    location = /errors/403.html {
+        internal;
+    }
+    error_page 404 /errors/404.html;
+    location = /errors/404.html {
+        internal;
+    }
+    error_page 419 /errors/419.html;
+    location = /errors/419.html {
+        internal;
+    }
+    error_page 429 /errors/429.html;
+    location = /errors/429.html {
+        internal;
+    }
+    error_page 500 /errors/500.html;
+    location = /errors/500.html {
+        internal;
+    }
+    error_page 503 /errors/503.html;
+    location = /errors/503.html {
+        internal;
+    }
+    
+    location ~ \.php$ {
+        try_files $uri /index.php =404;
+        fastcgi_pass php-upstream;
+        fastcgi_index index.php;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        #fixes timeouts
+        fastcgi_read_timeout 600;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt/;
+        log_not_found off;
+    }
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+
+
+    error_log /var/log/nginx/laravel_error.log;
+    access_log /var/log/nginx/laravel_access.log;
+}
