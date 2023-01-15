@@ -40,9 +40,31 @@ services:
         networks:
             - sail
         container_name: sail-nginx
+    meilisearch:
+        image: "getmeili/meilisearch:latest"
+        expose:
+            - "7700"
+        volumes:
+            - sail-meilisearch:/meili_data
+            - ./docker/meilisearch/dump/:/meili_data/dumps:rw
+        networks:
+            - sail
+        environment:
+            - MEILI_MASTER_KEY=${MEILISEARCH_KEY}
+            - MEILI_IMPORT_DUMP=/meili_data/dumps/meili-dump.dump
+            - MEILI_IGNORE_DUMP_IF_DB_EXISTS=true
+            - MEILI_IGNORE_MISSING_DUMP=true
+        healthcheck:
+            test:
+                ["CMD", "wget", "--no-verbose", "--spider", "${APP_URL}/health"]
+            retries: 3
+            timeout: 5s
+        container_name: sail-meilisearch
 networks:
     sail:
         driver: bridge
 volumes:
+    sail-meilisearch:
+        driver: local
     sail-redis:
         driver: local
