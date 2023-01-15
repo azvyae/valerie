@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 
@@ -7,7 +7,7 @@ RUN chmod +x /usr/local/bin/install-php-extensions
 LABEL maintainer="Azvya Erstevan I"
 
 ARG WWWGROUP
-ARG NODE_VERSION=16
+ARG NODE_VERSION=18
 ARG POSTGRES_VERSION=15
 
 WORKDIR /var/www/html

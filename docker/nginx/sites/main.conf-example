@@ -6,7 +6,7 @@ server {
 
     # For https
     listen 443 ssl;
-    listen [::]:443 ssl ipv6only=on;
+    listen [::]:443 ssl;
     ssl_certificate /etc/nginx/ssl/${SERVER_NAME}.crt;
     ssl_certificate_key /etc/nginx/ssl/${SERVER_NAME}.key;
 

@@ -1,9 +1,7 @@
 [Xdebug]
 
 zend_extension=xdebug.so
-xdebug.mode=off
 xdebug.client_port=9003
-;xdebug.client_host={change to your wsl2 host/localhost}
 xdebug.remote_handler=dbgp
 xdebug.start_with_request=yes
 
@@ -12,4 +10,5 @@ xdebug.max_nesting_level=250
 
 ; idekey value is specific to Visual Studio Code
 xdebug.idekey=vsc
-xdebug.client_host=
+xdebug.mode=off
+xdebug.client_host=localhost
