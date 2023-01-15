@@ -2,7 +2,7 @@
 version: "3"
 services:
     app:
-        image: erstevn/sail-php:1.2
+        image: erstevn/sail-php:latest
         build:
             context: ./docker/php/build
             dockerfile: Dockerfile
@@ -21,7 +21,7 @@ services:
             - "9000"
         container_name: sail-app
     nginx:
-        image: erstevn/sail-nginx:1.2
+        image: erstevn/sail-nginx:latest
         build:
             context: "./docker/nginx/build"
         depends_on:
