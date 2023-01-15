@@ -32,7 +32,7 @@ display_help() {
     echo "    --xdebug-ide-key  Xdebug IDE key"
     echo "    --xdebug-mode     Xdebug Mode (off, debug, develop, coverage)"
     echo "    --environment     Environment for installing this app"
-    echo "    --env-key (opt)   Env crypted key for decrypting file"
+    echo "    --env-key (opt)   Env crypted key for decrypting file, you may use (disable) as value for not decrypting any"
     echo
 }
 
@@ -92,8 +92,8 @@ install_non_interactive() {
     done
 
     # Check if all required options are passed
-    if [[ -z "$rcfile" || -z "$xdebug_ide_key" || -z "$xdebug_mode" || -z "$environment" ]]; then
-        echo "You have to provide --rcfile, --xdebug-ide-key, --xdebug-mode, --environment when using --noninteractive"
+    if [[ -z "$rcfile" || -z "$xdebug_ide_key" || -z "$xdebug_mode" || -z "$environment" || -z "$env_key" ]]; then
+        echo "You have to provide --rcfile, --xdebug-ide-key, --xdebug-mode, --environment, --env-key when using --noninteractive"
         exit 1
     fi
 
@@ -119,8 +119,8 @@ install_non_interactive() {
 #   Determine should clear terminal before showing logo
 #######################################
 show_valerie_logo() {
-    local clear=$1
-    if [ $clear = "--clear" ]; then
+    local clearConsole=$1
+    if [[ $clearConsole = "--clear" ]]; then
         clear
     fi
     echo " __      __   _           _      "
@@ -197,14 +197,20 @@ start_interactive_shell() {
 #######################################
 # Prepares sail env configuration.
 # Arguments:
-#    like .bashrc with full path
+#   like .bashrc with full path
 #   Env key to decrypt file
 #######################################
 prepare_sail_env() {
+
+    if [ ! -f ./.env ]; then
+        cp .env.example .env
+    fi
+
     local environment=$1
     local env_key=$2
     local app_key_val=$(grep -o "^APP_KEY=.*" .env | awk -F 'APP_KEY=' '{print $2}')
 
+    echo "Preparing sail environment"
     if [ -z "$environment" ]; then
         show_valerie_logo --clear
         read -p "Environment (optional): " environment
@@ -214,31 +220,43 @@ prepare_sail_env() {
         read -p "Env key: " env_key
     fi
 
-    # Run sail
-    vendor/bin/sail down && vendor/bin/sail up -d >/dev/null 2>&1
+    echo "Running sail in isolated mode"
+    vendor/bin/sail down >/dev/null 2>&1
+    vendor/bin/sail up -d >/dev/null 2>&1
 
-    # Link storage
-    if [ ! -f ./public/storage ]; then
+    if [ ! -L ./public/storage ]; then
+        echo "Creating storage symlink"
         vendor/bin/sail artisan storage:link
-
     fi
 
     # Generate app key
     if [ -z $app_key_val ]; then
+        echo "Generating app key"
         vendor/bin/sail artisan key:generate
     fi
 
-    # Decrypt env file if env_key is provided
-    if [ ! -z "$env_key" ]; then
-        if [ -z "$environment" ]; then
-            vendor/bin/sail artisan env:decrypt --key=$env_key
-        else
-            vendor/bin/sail artisan env:decrypt --key=$env_key --env=$environment
+    if [[ -n "$env_key" && "$env_key" != "disable" ]]; then
+        if [ -f ./.env.$environment.encrypted ]; then
+            echo "Decrypting .env.$environment"
+            vendor/bin/sail artisan env:decrypt --force --key=$env_key --env=$environment
+        elif [ -f ./.env.example.encrypted ]; then
+            echo "Decrypting .env.example"
+            vendor/bin/sail artisan env:decrypt --force --key=$env_key
         fi
     fi
 
-    # Install required Node Modules
-    vendor/bin/sail npm install
+    if [ "$environment" = 'local' ]; then
+        echo "Installing node modules"
+        vendor/bin/sail npm install
+        echo "Updating composer"
+        vendor/bin/sail composer install
+    else
+        echo "Installing node modules"
+        vendor/bin/sail npm install --production
+        vendor/bin/sail npm run build
+        echo "Updating composer"
+        vendor/bin/sail composer install --no-dev
+    fi
 
     # Stop sail
     vendor/bin/sail down >/dev/null 2>&1
@@ -262,7 +280,7 @@ install_main_app() {
     configure_sail_aliases $rcfile
 
     if [ ! -d ./vendor ]; then
-        echo "Installing required composer files"
+        echo "Installing first composer files"
         docker run --rm \
             -u "$(id -u):$(id -g)" \
             -v "$(pwd):/var/www/html" \
@@ -275,13 +293,14 @@ install_main_app() {
     fi
 
     echo "Updating opcache configuration"
-    cp ./docker/php/config/opcache.ini-example ./docker/php/config/opcache.ini
+    cp -f ./docker/php/config/opcache.ini-example ./docker/php/config/opcache.ini
     sleep 2
 
     configure_xdebug $xdebug_ide_key $xdebug_mode
-    change_docker_settings $environment
 
     prepare_sail_env $environment $env_key
+
+    change_docker_settings $environment
 
     echo "Successfully installed the application"
     sleep 2

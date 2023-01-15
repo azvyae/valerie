@@ -47,7 +47,7 @@ services:
         networks:
             - sail
         environment:
-            - MEILI_MASTER_KEY=${MEILISEARCH_KEY}
+            - MEILI_MASTER_KEY=${MEILISEARCH_KEY:-meilisearch-key}
             - MEILI_IMPORT_DUMP=/meili_data/dumps/meili-dump.dump
             - MEILI_IGNORE_DUMP_IF_DB_EXISTS=true
             - MEILI_IGNORE_MISSING_DUMP=true
