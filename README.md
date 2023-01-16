@@ -1,5 +1,5 @@
 
-# Valerie Framework 2.0.1
+# Valerie Framework 2.0.2
 
 Valerie is a bundle framework that is compatible with pure Laravel environments such as Forge, Sanctum, Vite, and others. It is essentially a Docker Compose file that has Sail features and is composed of several services:
 
@@ -102,6 +102,7 @@ Valerie is built using Laravel and Sail, so it is compatible with any pure Larav
 -   Version 1.1.0 : Adding Meilisearch to Dockerfile
 -   Version 2.0.0 : Meilisearch included, environment separation for local, production, testing, and staging, and other major changes.
 -   Version 2.0.1 : Bug fix for non interactive option doesn't working.
+-   Version 2.0.2 : Bug fix for failed running nginx container. Added new testing env.
 
 ## License
 The MIT License (MIT)

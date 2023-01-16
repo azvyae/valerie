@@ -1,13 +1,62 @@
 # For more information: https://laravel.com/docs/sail
 version: "3"
 services:
-  selenium:
-    image: "selenium/standalone-chrome"
+  app:
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"
     volumes:
-      - "./docker/selenium:/dev/shm"
+      - "sail-redis:/data"
     networks:
       - sail
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      retries: 3
+      timeout: 5s
+    container_name: sail-redis
+  pgsql:
+    image: "postgres:15"
+    environment:
+      PGPASSWORD: "${DB_PASSWORD:-sail_secret}"
+      POSTGRES_DB: "${DB_DATABASE:-sail_db}"
+      POSTGRES_USER: "${DB_USERNAME:-sail}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD:-sail_secret}"
+    volumes:
+      - "sail-pgsql:/var/lib/postgresql/data"
+      - "./vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql"
+    networks:
+      - sail
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "${DB_DATABASE:-sail_db}",
+          "-U",
+          "${DB_USERNAME:-sail}",
+        ]
+      retries: 3
+      timeout: 5s
+    container_name: sail-pgsql
 
 volumes:
   sail-pgsql:
     driver: local
+  sail-redis:
+    driver: local
+# # For more information: https://laravel.com/docs/sail
+# version: "3"
+# services:
+#   selenium:
+#     image: "selenium/standalone-chrome"
+#     volumes:
+#       - "./docker/selenium:/dev/shm"
+#     networks:
+#       - sail
+
+# volumes:
+#   sail-pgsql:
+#     driver: local

@@ -9,14 +9,6 @@ prepare_environment_variables() {
     APP_URL=$(echo "$APP_URL" | sed -e 's|^https\?://||' -e 's|/*$||')
 }
 
-show_environment_variables() {
-    echo $APP_NAME
-    echo $APP_ENV
-    echo $APP_URL
-    echo $SSL_RENEW_MAIL
-    echo $IS_SECURE
-}
-
 create_openssl_cert() {
     if [ ! -f /etc/nginx/ssl/$APP_URL.crt ]; then
         openssl req -x509 -nodes -days 365 -subj "/CN=$APP_NAME CA/OU=$APP_NAME IT/O=$APP_NAME/L=$APP_NAME/C=ID" -addext "subjectAltName=DNS.1:localhost,DNS.2:$APP_URL,DNS.3:meilisearch.$APP_URL" -newkey rsa:2048 -keyout /etc/nginx/ssl/$APP_URL.key -out /etc/nginx/ssl/$APP_URL.crt
@@ -32,7 +24,7 @@ create_certbot_cert() {
         certbot --nginx -d $APP_URL -d www.$APP_URL -d meilisearch.$APP_URL -n --agree-tos --email $SSL_RENEW_MAIL
     fi
     # create a server name based on .env file
-    (cd /etc/nginx/sites-available && cp main.conf-example main.conf && sed -i "s/\${SERVER_NAME}/$APP_URL www.$APP_URL/" main.conf)
+    (cd /etc/nginx/sites-available && cp main.conf-example main.conf && sed -i "s/\${SERVER_NAME}/$APP_URL/" main.conf)
     (cd /etc/nginx/sites-available && cp meilisearch.conf-example meilisearch.conf && sed -i "s/\${SERVER_NAME}/$APP_URL/" meilisearch.conf)
 }
 
@@ -73,26 +65,19 @@ set_cron_job() {
     crond -l 2 -b
 }
 
-log_cron_job() {
-    * * * * * root nginx -s reload >>/var/log/cron.log
-}
-
 start_nginx() {
     # Start nginx in foreground
     echo "NGINX started, daemon will restart every 00:00:00 UTC +7 now."
     nginx
 }
 
-# MAIN SCRIPT
-
+# Main script
 prepare_environment_variables
-show_environment_variables
-if [ "$APP_ENV" == "local" ]; then
+if [ "$APP_ENV" == "local" ] || [ "$APP_ENV" == "testing" ]; then
     create_openssl_cert
 else
     create_certbot_cert
 fi
 configure_site_settings
 set_cron_job
-log_cron_job
 start_nginx

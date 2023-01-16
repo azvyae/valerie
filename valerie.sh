@@ -202,10 +202,6 @@ start_interactive_shell() {
 #######################################
 prepare_sail_env() {
 
-    if [ ! -f ./.env ]; then
-        cp .env.example .env
-    fi
-
     local environment=$1
     local env_key=$2
     local app_key_val=$(grep -o "^APP_KEY=.*" .env | awk -F 'APP_KEY=' '{print $2}')
@@ -245,7 +241,7 @@ prepare_sail_env() {
         fi
     fi
 
-    if [ "$environment" = 'local' ]; then
+    if [ "$environment" = 'local' ] || [ "$environment" = 'testing' ]; then
         echo "Installing node modules"
         vendor/bin/sail npm install
         echo "Updating composer"
@@ -253,7 +249,6 @@ prepare_sail_env() {
     else
         echo "Installing node modules"
         vendor/bin/sail npm install --production
-        vendor/bin/sail npm run build
         echo "Updating composer"
         vendor/bin/sail composer install --no-dev
     fi
@@ -276,6 +271,12 @@ install_main_app() {
     local xdebug_mode=$3
     local environment=$4
     local env_key=$5
+
+    if [ -z "$environment" ]; then
+        show_valerie_logo --clear
+        read -p "Set env file (optional): " environment
+    fi
+    prepare_env_file $environment
 
     configure_sail_aliases $rcfile
 
@@ -307,13 +308,35 @@ install_main_app() {
 }
 
 #######################################
+# Copy env file.
+# Arguments:
+#   Environment
+#######################################
+prepare_env_file() {
+    local environment=$1
+    if [[ -n $environment && -f ./.env.$environment ]]; then
+        echo "Using .env.$environment file"
+        cp -f ./.env.$environment ./.env
+    else
+        echo "Using default .env.example file"
+        cp -f ./.env.example ./.env
+    fi
+    echo "Reconfiguring USER:GROUP"
+    sed -i '/WWWUSER/d' .env
+    sed -i '/WWWGROUP/d' .env
+    echo "WWWUSER=$(id -u $USER)" >>.env
+    echo "WWWGROUP=$(id -g $USER)" >>.env
+    sleep 2
+}
+
+#######################################
 # Sets Xdebug configuration.
 # Arguments:
 #   Xdebug IDE key
 #   Xdebug Mode (off, debug, coverage, develop)
 #######################################
 configure_xdebug() {
-    cp ./docker/php/config/xdebug.ini-example ./docker/php/config/xdebug.ini
+    cp -f ./docker/php/config/xdebug.ini-example ./docker/php/config/xdebug.ini
 
     local idekey=$1
     local mode=$2
@@ -361,13 +384,6 @@ change_docker_settings() {
     if [ ! -f ./docker-compose.$environment.yml ]; then
         err "./docker-compose.$environment.yml is not found"
         exit 0
-    fi
-
-    if [ -f ./.env.$environment ]; then
-        cp ./.env.$environment ./.env
-    else
-        echo "Using default .env.example file"
-        cp ./.env.example ./.env
     fi
 
     ln -sf ./docker-compose.$environment.yml ./docker-compose.override.yml
